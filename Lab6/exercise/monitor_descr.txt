@@ -1,0 +1,57 @@
+/*
+
+1. Identify entities:
+    - resources (types, capacity, ...) to be managed by this particular monitor
+    - threads (types, number, ...) using such resources
+2. Define the monitor’s API
+    - method names
+    - return values
+    - arguments
+3. Identify the priorities in the problem
+    - among threads
+    - among requests
+    - ...
+4. Define the queues needed to manage the operation of the monitor
+    - which queues?
+    - which policies inside/between queues?
+5. Define the data needed to model the state of the monitor
+    - state variables such as integers/counters, boolean variables, and enumeration to model the state
+6. Provide a detailed design of methods
+    6.1. Identify alternative cases within method
+    - if appropriate, define different behaviors based on thread types, resource types, action types, etc.
+    6.2. Identify conditions preventing resource acquisition
+    6.3. Define signaling/broadcasting upon resource release
+    6.4. Define signaling/broadcasting upon resource acquisition
+    6.5. Define what the initial state of the monitor should be (initialization)
+7. Implement the monitor
+    7.1. Start from generic template with the basic #includes, main loop, etc. (see this template), such as:
+        7.1.1. Data types for readability (e.g.: typedef thread_name_t char[10], ...)
+            - One data type will be the monitor itself (monitor_t)
+            - A field of monitor_t will be a mutex lock (pthread_mutex_t), to be used to guard access to the monitor's methods
+            - The monitor should also include one condvar per each queue
+        7.1.2. Constants, defined for readability
+            - e.g.: #define N_THREADS 5
+        7.1.3. Global data structures (such as the monitor itself)
+        7.1.4. Thread vectors, for the purpose of animating the application and validating the monitor implementation 
+            - e.g.: thread_name_t names[N_THREADS], pthread_t my_thread_names[N_THREADS]
+    7.2. Declare the monitor APIs. Typically:
+        - int init(monitor_t*)
+        - int destroy(monitor_t*)
+        - int acquire(monitor_t*, ...)
+        - int release(monitor_t*, ...)
+    7.3. Set up the environment for animating the application and validating the correct behavior of the monitor
+        7.3.1. Define the main() function. The typical sequence is:
+            - initialize the monitor
+            - loop to create N_THREADS threads
+            - loop to join N_THREADS threads
+            - destroy the monitor
+        7.3.2. Define the code associated with each thread type. The typical sequence is:
+            FOREVER
+            {
+                - acquire resource using a monitor method
+                - do something with the resource (or waste some time, in a simulated environment)
+                - release resource using a monitor method
+                - do something without the resource (or waste some more time, in a simulated environment)
+            }
+        7.3.3. Define all other methods and auxiliary functions (e.g. left(i), right(i), display_state(), eat(), …)
+*/

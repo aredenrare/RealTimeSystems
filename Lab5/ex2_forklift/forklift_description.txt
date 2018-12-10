@@ -1,0 +1,68 @@
+FORKLIFT ASSIGNMENT, LAB 5, REAL TIME SYSTEMS
+
+I used the template given in order to solve this synchronization problem, my explanation 
+is based on the changes and additions I implemented to this. 
+
+Step 1: Made variables
+	In order to keep track of all the boxes these variables were made:
+	
+	int boxes_in_alley and #define MAX_BOXES_IN_ALLEY, to make sure there 
+	were no more than 5 boxes in the alley infront of the truck
+
+	int boxes_delivered - counter for boxes delivered by the forklift
+
+	int boxes_returned - counter for boxes returned by the carts
+
+Step 2: protecting these shared variables with semaphores
+
+	In my code I used three different semaphores: sem_forklift, sem_cart and 
+	sem_alley.
+
+	sem_forklift: is used to awaken the forklift whenever a cart has brought a new
+	box in the alley for the forklift to place. The forklift has a 
+	sem_wait(&sem_forklift) in its forever loop and will start to to its job 
+	as soon as this is signalled. The fork will then do_action and add to the
+	boxes_delivered counter and subtracting from boxes_in_alley.
+	This semaphore did I use instead of a if statement as I think it might be better
+	for perfomance as the forklift code will only be running when it gets signaled.
+	
+	sem_cart: is used to make sure only one cart at a time makes a decision
+	wethever the alley is full or not. When it gets the signal from the sempahore
+	it checks out how many boxes there are in the alley and decides if it should
+	place the box, and then add to the boxes_in_alley counter or return the box and
+	then add to the boxes_returned counter. 
+
+	sem_alley: is used to make sure only one cart, or the forklift, can increment
+	or decrement the boxes_in_alley at a time to avoid the chance of race_condition.
+
+Step 3: Correct placements of semaphores.
+	To ensure that delay from the semaphores would not add on to the already existing
+	delays, I placed the decrementation and incrementation of boxes_in_alley (protected 
+	by sem_alley), before the function do_action in both the forklift and the carts.
+
+	I also released the sem_cart before do action as the other carts does not need to wait
+	for any other carts delays and action, and only needed the info of boxes_in_alley
+
+	I tried to do as little as possible between the semaphores to avoid as much as possible
+	the chanse of preemption and deadlocks. I did not experience any deadlocks with my final
+	solution.
+	
+Step 4: Testing
+	To test if the code did it's job while avoiding deadlocks or race conditions I
+	tested with different delays, constant max delays and no delays. Forcing the carts to do 
+	things simultaneously I figured would be a great way to check wether the semaphores 
+	worked or not.
+
+	I tested this with previous solutions and experienced many times 6 boxes in alley
+	deadlocks. I also found solutions with correct solutions but visible chances of race
+	conditions. My last solutions might not be optimal, but it seems to the job constantly 
+	without deadlocks and I cant see any obvious race conditions.
+
+Step 5: Results
+	With constant max delays i got these results running for 60 seconds:
+	boxes_delivered: 23, boxes_returned: 17
+
+	With random delays using the template:
+	1st run - Boxes_delivered: 37, Boxes_returned: 31
+	2nd run - boxes_delivered: 37, Boxes_returned: 35
+	3rd run - boxes_delivered: 36, Boxes_returned: 31

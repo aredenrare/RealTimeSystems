@@ -1,0 +1,48 @@
+Exercise answers
+
+1.3
+
+1) With N_THREADS = 1, I used the following values to find where the program used around 1000 msec
+ * 		** N_STEPS = 1000000000 1e+09, took 16198.563 msec
+ * 		** N_STEPS = 100000000 1e+08, took 1623.457 msec
+ * 		** N_STEPS = 70000000 7e+07, took 1139.299 msec
+ * 		** N_STEPS = 60000000 6e+07, took 973.613 msec
+ * 		** N_STEPS = 65000000 took 1065.818 msec
+ 
+2) With N_THREADS = 4 and N_STEPS = 6.5e+07 I got the following results:
+parent:	 pi_final = 3.1415926536
+parent:	 actual PI: 3.1415926536
+parent:	 N_THREADS: 4, N_STEPS: 6e+07, total time: 281.182 (msec)
+
+With N_THREADS = 1 and N_STEPS = 6.5e+07 I got these results:
+parent:	 pi_final = 3.1415926536
+parent:	 actual PI: 3.1415926536
+parent:	 N_THREADS: 1, N_STEPS: 6e+07, total time: 1058.481 (msec)
+
+In conclusion there is no accuracy loss with using fewer threads, but the performance is 
+almost 4 times faster using 4 threads than one.
+
+3) Looking at the task manager while running with N_THREADS between 1-6, N_STEPS = 6.5e+07
+	My pc runs 4 CPUS. With N_THREAD = 1, one of the CPUS gets a massive percentage of usage.
+		over 50%, but as I increase N_THREADS more of the CPUS get utilizied and the peaks
+		gets lower and lower for the CPUs. It looks like it is no performance difference
+		for N_THREADS = 4, 5, 6, which makes sence when knowing that my PC runs 4 CPUS
+		and therefore can only utilize 4 at the time.
+
+1.4
+
+1) There is many ways to solve problems with race conditions. It all depends on how to fix shared
+variable synchronization in a right way. This can be done with using mutexes, Semaphores or some
+kind of locking mechanisms.
+
+2) Modifying what is the global variables can increase the chance of race conditions. In our case
+we use the variable pi_final as the only global variable which is used only once per thread. If we instead use the variable sum as a global variable, this variable is used N_STEPS/N*interval+1 times each thread and there will no doubt be way more race conditions as the threads working concurrently will use this variable "simutaniously" or at least out of synchronization.
+
+What I ended up doing was simply moving the pi_final inside the for loop inside compute_pi,
+so it was updatet at every iteration instead of just at the end whick follows basically the same 
+idea.
+
+3) The pi_final value does now take the value of the last thread that did it's calculation,
+and the value is therefore way lower than what the pi should really be. This is happening now because the threads will no longer be updated with what the other threads are doing.
+
+
